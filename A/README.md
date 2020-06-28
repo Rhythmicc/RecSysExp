@@ -125,7 +125,7 @@ def draw_whyclick():
     plt.xlabel("主题")
     plt.ylabel("数量")
     plt.legend(loc="best")
-    plt.savefig('./img/https://i.loli.net/2020/06/28/DC8hetJiOKx5a2s.png', dpi=300)
+    plt.savefig('./img/whyclick_bar.png', dpi=300)
     plt.show()
     fig.close()
 ```
@@ -173,7 +173,7 @@ def draw_quality():
     plt.xlabel("质量")
     plt.ylabel("数量")
     plt.legend(loc="best")
-    plt.savefig('./img/https://i.loli.net/2020/06/28/RtsuiYNbIDdcmvX.png', dpi=300)
+    plt.savefig('./img/quality_bar.png', dpi=300)
     plt.show()
     plt.close()
 ```
