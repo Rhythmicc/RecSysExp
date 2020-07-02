@@ -1,0 +1,99 @@
+Starting ml-100k
+-----------
+MF Model
+Fold 0
+Epoch 100 loss=0.7942	 test=0.9787
+RMSE: 0.9745
+
+Fold 1
+Epoch 100 loss=0.7926	 test=0.9687
+RMSE: 0.9608
+
+Fold 2
+Epoch 100 loss=0.7953	 test=0.9617
+RMSE: 0.9568
+
+Fold 3
+Epoch 100 loss=0.7915	 test=0.9594
+RMSE: 0.9560
+
+Fold 4
+Epoch 100 loss=0.7937	 test=0.9709
+RMSE: 0.9663
+
+Average: 0.9629
+Use time: 187.7541
+
+AutoEncoder Model
+Fold 0
+Epoch 10 	 test=0.4739
+RMSE: 0.4739
+
+Fold 1
+Epoch 10 	 test=0.4665
+RMSE: 0.4665
+
+Fold 2
+Epoch 10 	 test=0.4670
+RMSE: 0.4670
+
+Fold 3
+Epoch 10 	 test=0.4679
+RMSE: 0.4679
+
+Fold 4
+Epoch 10 	 test=0.4682
+RMSE: 0.4682
+
+Average: 0.4687
+Use time: 353.8401
+
+Starting amazon
+-----------
+MF Model
+Fold 0
+Epoch 150 loss=0.3059	 test=1.6318
+RMSE: 1.6301
+
+Fold 1
+Epoch 150 loss=0.3102	 test=1.6358
+RMSE: 1.6358
+
+Fold 2
+Epoch 150 loss=0.3096	 test=1.6429
+RMSE: 1.6424
+
+Fold 3
+Epoch 150 loss=0.3099	 test=1.6378
+RMSE: 1.6374
+
+Fold 4
+Epoch 150 loss=0.3101	 test=1.6505
+RMSE: 1.6499
+
+Average: 1.6391
+Use time: 642.3054
+
+NCF Model
+Fold 0
+Epoch 15  loss=1.2235	 test=1.2188
+RMSE: 1.2184
+
+Fold 1
+Epoch 15  loss=1.2230	 test=1.2216
+RMSE: 1.2214
+
+Fold 2
+Epoch 15  loss=1.2200	 test=1.2333
+RMSE: 1.2329
+
+Fold 3
+Epoch 15  loss=1.2231	 test=1.2222
+RMSE: 1.2221
+
+Fold 4
+Epoch 15  loss=1.2240	 test=1.2172
+RMSE: 1.2171
+
+Average: 1.2224
+Use time: 366.1008
