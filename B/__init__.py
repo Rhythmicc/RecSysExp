@@ -1,4 +1,4 @@
-import torch
+import torch, gc
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error
@@ -19,6 +19,7 @@ def random_model(train_data, test_data):
 
 def torch_runner(model, train_data, test_data):
     # 设置随机数种子，定义优化器
+    torch.cuda.manual_seed(SEED)
     torch.manual_seed(SEED)
     np.random.seed(SEED)
     optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=L2)
@@ -27,6 +28,7 @@ def torch_runner(model, train_data, test_data):
     test_batches = model.prepare_batches(test_data)
     best_predictions, test_results = None, list()
     for epoch in range(EPOCH):  # 一共训练EPOCH轮
+        gc.collect()
         epoch_train_data = train_data.copy().sample(frac=1)  # 随机打乱训练集
         batches = model.prepare_batches(epoch_train_data)  # 准备训练集batch
 
@@ -40,7 +42,7 @@ def torch_runner(model, train_data, test_data):
             try:
                 loss.backward()
                 loss_lst.append(loss.detach().cpu().data.numpy())
-            except :
+            except:
                 print_flag = False
             optimizer.step()
 
@@ -59,7 +61,5 @@ def torch_runner(model, train_data, test_data):
             print("Epoch {:<3} loss={:<.4f}\t test={:<.4f}".format(epoch + 1, np.mean(loss_lst), rmse), end='\r')
         else:
             print("Epoch {:<3}\t test={:<.4f}".format(epoch + 1, rmse), end='\r')
-    else:
-        print()
-
+    print()
     return best_predictions

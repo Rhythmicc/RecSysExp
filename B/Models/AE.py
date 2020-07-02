@@ -28,6 +28,8 @@ class AutoEncoderDataset(data.Dataset):
         return self.x_mat, self.mask
 
     def add_extra(self, dataset):
+        if not dataset:
+            return
         for u, v, r in dataset:
             self._x_mat[v][u] = r
             self._mask[v][u] = 1
@@ -40,16 +42,13 @@ class _AutoEncoder(torch.nn.Module):
         super(_AutoEncoder, self).__init__()
         encoder_dict = OrderedDict()
         for i in range(len(n_user_and_rank) - 1):
-            encoder_dict['enc_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i],
-                                                        n_user_and_rank[i + 1])  # nn.Linear(input,out,bias=True)
-            # d1['enc_bn' + str(i)] = nn.BatchNorm1d(hidden[i + 1])
+            encoder_dict['enc_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i], n_user_and_rank[i + 1])
             encoder_dict['enc_drop' + str(i)] = torch.nn.Dropout(dropout)
             encoder_dict['enc_relu' + str(i)] = torch.nn.ReLU()
         self.encoder = torch.nn.Sequential(encoder_dict)
         decoder_dict = OrderedDict()
         for i in range(len(n_user_and_rank) - 1, 0, -1):
             decoder_dict['dec_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i], n_user_and_rank[i - 1])
-            # d2['dec_bn' + str(i)] = nn.BatchNorm1d(hidden[i - 1])
             decoder_dict['dec_drop' + str(i)] = torch.nn.Dropout(dropout)
             decoder_dict['dec_relu' + str(i)] = torch.nn.Sigmoid()
         self.decoder = torch.nn.Sequential(decoder_dict)
@@ -70,10 +69,13 @@ class AutoEncoder:
         self.n_user = n_user
         self.n_item = n_item
         self.has_eval = False
+        self.jump_store = 2
+        self.store_step = 5
+        self.part_set = None
 
     def forward(self, x):
         """使用x更新模型并返回结果和loss"""
-        if not self.has_eval:  # 训练
+        if not self.has_eval:
             train_loader = DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True, pin_memory=True)
             features = Variable(torch.FloatTensor(self.batch_size, self.n_user + 1))
             masks = Variable(torch.FloatTensor(self.batch_size, self.n_user + 1))
@@ -89,11 +91,17 @@ class AutoEncoder:
                 loss = func.mse_loss(output * masks, features * masks)
                 loss.backward()
             return -1, 0
-        else:  # 预测
+        else:
             res = []
             x_mat, mask = self.train_set.get_mat()
             features = Variable(x_mat)
             x_mat = self.net(features).t().cpu().data.numpy()
+            rate_ls = [np.random.rand(), np.random.rand()]
+            l, r = int(len(x) * min(rate_ls)), int(len(x) * max(rate_ls))
+            if not self.part_set:
+                self.part_set = x[l:r:self.store_step]
+            else:
+                self.part_set += x[l:r:self.store_step]  # 记录有价值的信息给下一轮训练
             for i, j, r in x:
                 res.append(x_mat[i][j])
             return np.array(res), 0
@@ -121,13 +129,16 @@ class AutoEncoder:
             res.append((u_ids[index], i_ids[index], labels[index]))
         return res
 
-    def prepare_batches(self, pd_data, store_data=True, force_update=True):
+    def prepare_batches(self, pd_data):
         # 产生data对应的所有batch的list，每个batch是一个dict，会被送入forward函数中
         data_list = self.pre_deal_data(pd_data, 0, len(pd_data))
-        if not self.train_set or force_update:
+        if not self.train_set or self.jump_store:
             self.train_set = AutoEncoderDataset(data_list, self.n_user, self.n_item)
-        elif store_data:
-            self.train_set.add_extra(data_list)  # 偷数据（将force_update设为False）
+            self.jump_store -= 1
+        else:
+            self.train_set.add_extra(data_list)
+        self.train_set.add_extra(self.part_set)        # 载入传递训练数据
+        self.part_set.clear() if self.part_set else 1  # 丢掉存储的训练数据
         self.has_eval = False
         total_batch = int((len(pd_data) + self.batch_size - 1) / self.batch_size)
         batches = list()
