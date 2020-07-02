@@ -38,21 +38,21 @@ class AutoEncoderDataset(data.Dataset):
 class _AutoEncoder(torch.nn.Module):
     def __init__(self, n_user_and_rank, dropout=0.1):
         super(_AutoEncoder, self).__init__()
-        d1 = OrderedDict()
+        encoder_dict = OrderedDict()
         for i in range(len(n_user_and_rank) - 1):
-            d1['enc_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i],
+            encoder_dict['enc_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i],
                                                         n_user_and_rank[i + 1])  # nn.Linear(input,out,bias=True)
             # d1['enc_bn' + str(i)] = nn.BatchNorm1d(hidden[i + 1])
-            d1['enc_drop' + str(i)] = torch.nn.Dropout(dropout)
-            d1['enc_relu' + str(i)] = torch.nn.ReLU()
-        self.encoder = torch.nn.Sequential(d1)
-        d2 = OrderedDict()
+            encoder_dict['enc_drop' + str(i)] = torch.nn.Dropout(dropout)
+            encoder_dict['enc_relu' + str(i)] = torch.nn.ReLU()
+        self.encoder = torch.nn.Sequential(encoder_dict)
+        decoder_dict = OrderedDict()
         for i in range(len(n_user_and_rank) - 1, 0, -1):
-            d2['dec_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i], n_user_and_rank[i - 1])
+            decoder_dict['dec_linear' + str(i)] = torch.nn.Linear(n_user_and_rank[i], n_user_and_rank[i - 1])
             # d2['dec_bn' + str(i)] = nn.BatchNorm1d(hidden[i - 1])
-            d2['dec_drop' + str(i)] = torch.nn.Dropout(dropout)
-            d2['dec_relu' + str(i)] = torch.nn.Sigmoid()
-        self.decoder = torch.nn.Sequential(d2)
+            decoder_dict['dec_drop' + str(i)] = torch.nn.Dropout(dropout)
+            decoder_dict['dec_relu' + str(i)] = torch.nn.Sigmoid()
+        self.decoder = torch.nn.Sequential(decoder_dict)
 
     def forward(self, x):
         x = (x - 1) / 5.0
@@ -121,13 +121,13 @@ class AutoEncoder:
             res.append((u_ids[index], i_ids[index], labels[index]))
         return res
 
-    def prepare_batches(self, pd_data):
+    def prepare_batches(self, pd_data, store_data=True, force_update=True):
         # 产生data对应的所有batch的list，每个batch是一个dict，会被送入forward函数中
         data_list = self.pre_deal_data(pd_data, 0, len(pd_data))
-        if not self.train_set:
+        if not self.train_set or force_update:
             self.train_set = AutoEncoderDataset(data_list, self.n_user, self.n_item)
-        else:
-            self.train_set.add_extra(data_list)
+        elif store_data:
+            self.train_set.add_extra(data_list)  # 偷数据（将force_update设为False）
         self.has_eval = False
         total_batch = int((len(pd_data) + self.batch_size - 1) / self.batch_size)
         batches = list()
@@ -144,4 +144,4 @@ def model(train_data, test_data):
     n_users = all_data['user_id'].unique().size
     n_items = all_data['item_id'].unique().size
     ae = AutoEncoder(n_users, n_items, 300, BATCH)
-    return torch_runner(ae, all_data, test_data)
+    return torch_runner(ae, train_data, test_data)

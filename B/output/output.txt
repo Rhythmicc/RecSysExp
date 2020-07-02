@@ -26,27 +26,27 @@ Use time: 187.7541
 
 AutoEncoder Model
 Fold 0
-Epoch 10 	 test=0.4739
-RMSE: 0.4739
+Epoch 10         test=0.9399
+RMSE: 0.9359
 
 Fold 1
-Epoch 10 	 test=0.4665
-RMSE: 0.4665
+Epoch 10         test=0.9650
+RMSE: 0.9352
 
 Fold 2
-Epoch 10 	 test=0.4670
-RMSE: 0.4670
+Epoch 10         test=0.9414
+RMSE: 0.9326
 
 Fold 3
-Epoch 10 	 test=0.4679
-RMSE: 0.4679
+Epoch 10         test=0.9472
+RMSE: 0.9376
 
 Fold 4
-Epoch 10 	 test=0.4682
-RMSE: 0.4682
+Epoch 10         test=0.9445
+RMSE: 0.9320
 
-Average: 0.4687
-Use time: 353.8401
+Average: 0.9347
+Use time: 306.3953
 
 Starting amazon
 -----------
