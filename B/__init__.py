@@ -1,15 +1,18 @@
-import torch, gc
-import pandas as pd
+import gc
+
+import numba
 import numpy as np
+import pandas as pd
+import torch
 from sklearn.metrics import mean_squared_error
 
 __name__ = "B"
 __package__ = "B"
-SEED = 2020    # 随机数种子，方便重现实验结果
-LR = 1e-2      # 学习率
-L2 = 1e-4      # 权重衰减系数
-EPOCH = 100    # 训练的总轮次
-BATCH = 1024   # 批大小
+SEED = 2020  # 随机数种子，方便重现实验结果
+LR = 1e-2  # 学习率
+L2 = 1e-4  # 权重衰减系数
+EPOCH = 100  # 训练的总轮次
+BATCH = 1024  # 批大小
 EMB_SIZE = 10  # MF模型的嵌入维度
 
 
@@ -52,14 +55,14 @@ def torch_runner(model, train_data, test_data):
         for batch in test_batches:
             prediction, loss = model(batch)
             predictions.extend(prediction)
-        rmse = np.sqrt(mean_squared_error(test_data['label'], predictions))
+        rmse = np.sqrt(mean_squared_error(test_data["label"], predictions))
         if epoch == 0 or rmse < min(test_results):  # 如果当前的模型是目前最好的
             best_predictions = predictions
         test_results.append(rmse)
 
         if print_flag:
-            print("Epoch {:<3} loss={:<.4f}\t test={:<.4f}".format(epoch + 1, np.mean(loss_lst), rmse), end='\r')
+            print("Epoch {:<3} loss={:<.4f}\t test={:<.4f}".format(epoch + 1, np.mean(loss_lst), rmse), end="\r")
         else:
-            print("Epoch {:<3}\t test={:<.4f}".format(epoch + 1, rmse), end='\r')
+            print("Epoch {:<3}\t test={:<.4f}".format(epoch + 1, rmse), end="\r")
     print()
     return best_predictions

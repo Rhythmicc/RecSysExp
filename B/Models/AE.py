@@ -1,8 +1,10 @@
 from collections import OrderedDict
-from torch.autograd import Variable
-from torch.utils.data import DataLoader
-from torch.utils import data
+
 import torch.nn.functional as func
+from torch.autograd import Variable
+from torch.utils import data
+from torch.utils.data import DataLoader
+
 from B import *
 
 
@@ -130,7 +132,7 @@ class AutoEncoder:
         return res
 
     def prepare_batches(self, pd_data):
-        # 产生data对应的所有batch的list，每个batch是一个dict，会被送入forward函数中
+        # * 产生data对应的所有batch的list，每个batch是一个dict，会被送入forward函数中
         data_list = self.pre_deal_data(pd_data, 0, len(pd_data))
         if not self.train_set or self.jump_store:
             self.train_set = AutoEncoderDataset(data_list, self.n_user, self.n_item)
